@@ -1,3 +1,5 @@
+##### [🇫🇷 Version française](README.fr.md) / [🇬🇧 English version](README.md)
+
 # FT_TRANSCENDANCE PROJECT FOR 42
 By chdonnat (Christophe Donnat from 42 Perpignan, France)
 
