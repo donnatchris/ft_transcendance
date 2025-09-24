@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+.font-press-start {
+	font-family: 'Press Start 2P', cursive;
+  }
+
+.font-tomorrow {
+	font-family: 'Tomorrow', sans-serif;
+  }
+
+.embossed {
+	text-shadow:
+	  1px 1px 2px #fff8,   /* lumiere en bas à droite */
+	 -1px -1px 1px #0008;  /* ombre en haut à gauche */
+  }
+
+@keyframes blink {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0; }
+  }
+  
+.blink {
+	animation: blink 1s steps(1, start) infinite;
+  }
+
+#canvasFrame {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 400px; /* ou ce que tu veux */
+  }
+
+  @keyframes typewriter {
+	from { width: 0 }
+	to { width: 100% }
+  }
+  
+  @keyframes blink {
+	50% { border-color: transparent }
+  }
+  
+  .typewriter {
+    overflow: hidden;
+    white-space: normal;
+    width: 100%;
+    animation: 
+        typewriter 3s steps(100, end) forwards, 
+        blink 0.7s step-end infinite;
+}
+
+@layer utilities {
+	.animate-fade-in {
+	  animation: fadeIn 1.2s ease-in;
+	}
+	@keyframes fadeIn {
+	  from { opacity: 0; }
+	  to   { opacity: 1; }
+	}
+  }
+  

@@ -1,0 +1,76 @@
+groups:
+- name: transcendance_alerts
+  rules:
+  # Alertes basées sur les healthchecks
+  - alert: GameServiceHealthcheckFailed
+    expr: probe_success{instance="https://game:3002/health"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "🎮 Service Game healthcheck failed!"
+      description: "Le healthcheck du service Game a échoué depuis 30 secondes."
+
+  - alert: PublicServiceHealthcheckFailed
+    expr: probe_success{instance="https://public:3000/health"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "🌐 Service Public healthcheck failed!"
+      description: "Le healthcheck du service Public a échoué depuis 30 secondes."
+
+  - alert: UserServiceHealthcheckFailed
+    expr: probe_success{instance="https://user:3001/health"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "👤 Service User healthcheck failed!"
+      description: "Le healthcheck du service User a échoué depuis 30 secondes."
+
+  - alert: GateServiceHealthcheckFailed
+    expr: probe_success{instance="https://gate:3005/health"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "🚪 Service Gate healthcheck failed!"
+      description: "Le healthcheck du service Gate a échoué depuis 30 secondes."
+
+  - alert: IAServiceHealthcheckFailed
+    expr: probe_success{instance="https://ia:3003/health"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "🤖 Service IA healthcheck failed!"
+      description: "Le healthcheck du service IA a échoué depuis 30 secondes."
+
+  - alert: KibanaHealthcheckFailed
+    expr: probe_success{instance="http://kibana:5601/kibana/api/status"} == 0
+    for: 60s
+    labels:
+      severity: warning
+    annotations:
+      summary: "📊 Kibana healthcheck failed!"
+      description: "Le healthcheck de Kibana a échoué depuis 1 minute."
+
+  - alert: LogstashHealthcheckFailed
+    expr: probe_success{instance="http://logstash:9600/_node/stats"} == 0
+    for: 60s
+    labels:
+      severity: warning
+    annotations:
+      summary: "📝 Logstash healthcheck failed!"
+      description: "Le healthcheck de Logstash a échoué depuis 1 minute."
+
+  # Alertes pour les durées de réponse des healthchecks
+  - alert: SlowHealthcheckResponse
+    expr: probe_duration_seconds > 5
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Slow healthcheck response for {{ $labels.instance }}"
+      description: "Le healthcheck de {{ $labels.instance }} prend plus de 5 secondes à répondre."

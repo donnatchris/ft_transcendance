@@ -1,0 +1,31 @@
+http:
+  routers:
+    grafana:
+      rule: "PathPrefix(`/grafana`)"
+      entryPoints: ["websecure"]
+      service: grafana
+      tls: {}
+    public:
+      rule: "PathPrefix(`/`)"
+      entryPoints: ["websecure"]
+      service: public
+      tls: {}
+    kibana:
+      rule: "PathPrefix(`/kibana`)"
+      entryPoints: ["websecure"]
+      service: kibana
+      tls: {}
+
+  services:
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:4952"
+    public:
+      loadBalancer:
+        servers:
+          - url: "https://public:3000"
+    kibana:
+      loadBalancer:
+        servers:
+          - url: "http://kibana:5601"

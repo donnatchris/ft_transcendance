@@ -1,0 +1,20 @@
+api:
+  dashboard: true
+  insecure: true 
+
+entryPoints:
+  websecure:
+    address: ":3006"      # HTTPS
+
+providers:
+  file:
+    directory: /dynamic
+    watch: true
+
+serversTransport:
+  insecureSkipVerify: true
+
+log:
+  level: DEBUG
+
+accessLog: {}

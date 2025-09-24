@@ -1,0 +1,8 @@
+cluster.name: docker-cluster
+network.host: 0.0.0.0
+
+# kibana authentification
+xpack.security.enabled: true
+xpack.watcher.enabled: false
+# faster than trial version
+xpack.license.self_generated.type: basic

@@ -1,0 +1,14 @@
+modules:
+  default:
+    http_client_config:
+      tls_config:
+        insecure_skip_verify: true
+    metrics:
+    - name: transcendance_online_users_nbuser
+      path: "{.nbuser}"
+      help: Number of online users in Transcendance
+      type: value
+    - name: transcendance_online_party_count
+      path: "{.party_count}"
+      help: Number of game in Transcendance
+      type: value

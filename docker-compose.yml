@@ -1,0 +1,371 @@
+services:
+# --- Generate Cert --- #
+  certs:
+    container_name: certs
+    build:
+      context: ./certs
+    volumes:
+      - cert:/etc/ssl
+    networks:
+      - Transcendence
+
+# --- Reverse Proxy --- #
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    command:
+      - --configFile=/traefik.yml
+    ports:
+      - "3000:3006"
+    volumes:
+      - ./traefik.yml:/traefik.yml:ro
+      - ./certs.yml:/dynamic/certs.yml:ro
+      - cert:/certs
+      - ./services.yml:/dynamic/services.yml:ro
+    depends_on:
+      - certs
+    networks:
+      - Transcendence
+    restart: unless-stopped
+
+# --- Base Services --- #
+  user:
+    container_name: user
+    build:
+      context: ./user
+    image: user:transcendence
+    expose:
+      - "3001"
+    restart: unless-stopped
+    volumes:
+      - cert:/etc/ssl
+      - user:/app
+    env_file:
+      - .env
+    depends_on:
+      - gate
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f https://localhost:3001/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  game:
+    container_name: game
+    build:
+      context: ./game
+    env_file:
+      - .env
+    image: game:transcendence
+    expose:
+      - "3002"
+      - "3004"
+    restart: unless-stopped
+    volumes:
+      - cert:/etc/ssl
+      - ./packages:/packages
+      - game:/app
+    depends_on:
+      - gate
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f https://localhost:3002/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  ia:
+    container_name: ia
+    build:
+      context: ./ia
+    env_file:
+      - .env
+    image: ia:transcendence
+    expose:
+      - "3003"
+    restart: unless-stopped
+    volumes:
+      - cert:/etc/ssl
+      - ./packages:/packages
+    depends_on:
+      - gate
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f https://localhost:3003/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  
+  gate:
+    container_name: gate
+    build:
+      context: ./gate
+    env_file:
+      - .env
+    image: gate:transcendence
+    depends_on:
+      - traefik
+    volumes:
+      - cert:/etc/ssl
+    expose:
+      - "3005"
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f https://localhost:3005/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  public:
+    container_name: public
+    build:
+      context: ./public
+    image: public:transcendence
+    expose:
+      - "3000"
+    volumes:
+      - cert:/etc/ssl
+      - ./public:/var/www/public
+      - ./packages:/var/www/packages
+      - /var/www/public/node_modules # Prevents node_modules from being overwritten
+    restart: unless-stopped
+    depends_on:
+      - gate
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f https://localhost:3000/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# --- ELK PART --- #
+  setup:
+    container_name: setup
+    build:
+      context: ELK/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    init: true
+    profiles:
+      - elk
+    volumes:
+      - ./ELK/setup/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./ELK/setup/lib.sh:/lib.sh:ro,Z
+      - ./ELK/setup/roles:/roles:ro
+    env_file:
+      - .env
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - Transcendence
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    container_name: elasticsearch
+    build:
+      context: ELK/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    profiles:
+      - elk
+    image: elasticsearch:transcendence
+    volumes:
+      - ./ELK/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
+      - elasticsearch:/usr/share/elasticsearch/data:Z
+    env_file:
+      - .env
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx4g
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      discovery.type: single-node
+    networks:
+      - Transcendence
+    restart: unless-stopped
+    expose:
+      - "9200"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -u elastic:${ELASTIC_PASSWORD} -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 50s
+
+  kibana:
+    container_name: kibana
+    build:
+      context: ELK/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    profiles:
+      - elk
+    image: kibana:transcendence
+    volumes:
+      - ./ELK/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+    env_file:
+      - .env
+    environment:
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - Transcendence
+    expose:
+      - "5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:5601/kibana/api/status || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 150s
+
+  logstash:
+    container_name: logstash
+    build:
+      context: ELK/logstash/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    profiles:
+      - elk
+    image: logstash:transcendence
+    volumes:
+      - ./ELK/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./ELK/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    env_file:
+      - .env
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx1g
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+    networks:
+      - Transcendence
+    expose:
+      - 50000
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9600/_node/stats || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# --- Prometheus Grafana part --- #
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    expose:
+      - "9090"
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: blackbox-exporter
+    profiles:
+      - monitoring
+    expose:
+      - "9115"
+    volumes:
+      - ./monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml
+    restart: unless-stopped
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:9115/metrics || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  json-exporter:
+    image: prometheuscommunity/json-exporter:latest
+    container_name: json-exporter
+    profiles:
+      - monitoring
+    expose:
+      - "7979"
+    volumes:
+      - ./monitoring/json-exporter/config.yml:/config.yml
+    command:
+      - '--config.file=/config.yml'
+    restart: unless-stopped
+    networks:
+      - Transcendence
+    depends_on:
+      - user
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:7979/metrics || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    profiles:
+      - monitoring
+    expose:
+      - "4952"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_ROOT_URL=https://localhost/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_HTTP_PORT=4952
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/transcendance-healthchecks.json
+    volumes:
+      - ./monitoring/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - Transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:4952/api/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 150s
+
+volumes:
+  cert:
+  prom_data:
+  elasticsearch:
+  user:
+  game:
+
+
+networks:
+  Transcendence:
+    name: Transcendence
+    driver: bridge

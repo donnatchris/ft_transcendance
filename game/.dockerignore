@@ -1,0 +1,11 @@
+# Ignore Docker build files
+
+Dockerfile
+.dockerignore
+node_modules
+dist
+package-lock.json
+
+# Ignore OS artifacts
+
+\*\*/.DS_Store

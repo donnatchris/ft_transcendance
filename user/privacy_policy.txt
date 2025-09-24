@@ -1,0 +1,59 @@
+Privacy Policy
+
+Last updated: [08/18/2025]
+
+We value your privacy and are committed to protecting your personal data.
+This Privacy Policy explains what information we collect, how we use it, and what rights you have.
+
+1. Data we collect
+
+Email address: required to create your account.
+Login, display name, status and password hash: required for authentication and gameplay.
+Optional profile data: avatar.
+Game-related data: match history and personal statistics.
+We do not collect or process any other personal data.
+
+2. How we use your data
+
+To manage your account and allow you to play.
+To contact you only in case of issues related to your account.
+To ensure security and prevent abuse.
+Your email address is never shared with other users and is never transferred to third parties.
+
+3. Data storage and security
+
+Passwords are stored only as secure cryptographic hashes (never in plain text).
+The email address is stored in our database but never made public.
+Technical measures are applied to protect your data against unauthorized access.
+
+4. Data retention
+
+Your account and data will be automatically deleted after 6 months of inactivity.
+You can request deletion of your account at any time.
+When your account is deleted, all personal information and related data (friends, matches, statistics) are also deleted or anonymized.
+
+5. Your rights
+
+Under the GDPR, you have the following rights:
+Access: you can request to see what data we hold about you.
+Rectification: you can modify your personal information at any time.
+Erasure: you can delete your account and personal data permanently.
+Restriction and objection: you can limit or object to certain uses of your data.
+To exercise your rights, please contact us at: [Your contact email]
+
+6. Cookies
+
+We use cookies only for authentication purposes (session token).
+Cookies are marked as HttpOnly, Secure, and SameSite=strict.
+No tracking or third-party cookies are used.
+
+7. Legal basis
+
+We process your email and login information on the basis of:
+Contractual necessity: to provide you with an account and game access.
+Legitimate interest: to ensure account security and prevent fraud.
+
+8. Contact
+
+If you have any questions about this Privacy Policy or your personal data, you can reach us at:
+test@gmail.test

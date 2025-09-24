@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="/output.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@700&display=swap" rel="stylesheet">
+	<script type="module" src="./dist/utils/launchHeartbeat.js"></script>
+	<script type="module" src="./dist/sparouter.js"></script>
+	<script type="module" src="./dist/loginBox.js"></script>
+	<script type="module" src="./dist/frame.js"></script>
+</head>
+
+<body class="relative min-h-screen w-full bg-black text-white">
+	<!-- Temoin login -->
+	<div id="loginBox" class="flex items-start absolute top-[3%] right-[0%] z-50 w-[20%] h-16 bg-transparent"></div>
+	</div>
+
+	<!-- Cadre permanent -->
+	<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+		<svg viewBox="0 0 1920 1227" class="w-full h-full pointer-events-none z-20" preserveAspectRatio="none">
+			<image href="./img/frames/frame.png" x="0" y="0" width="1920" height="1227" />
+		</svg>
+		<div id="screen" class="absolute left-[20vw] right-[20vw] top-[21vh] bottom-[18vh] z-10 p-8">
+			<!-- Contenu de l single page -->
+		</div>
+	</div>
+
+	<!-- Boutons -->
+	<div id="navbar" class="fixed bottom-[10%] left-1/2 transform -translate-x-1/2 z-30 w-[90vw] max-w-6xl flex items-center justify-center gap-2 sm:gap-4 lg:gap-8"> 
+		<a href="#" class="transition duration-300 ease-in-out transform hover:scale-105 font-tomorrow font-bold text-lg sm:text-2xl lg:text-3xl xl:text-4xl border border-white px-2 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg flex-1 text-center max-w-100 min-w-0">
+			<span class="block truncate">Home</span>
+		</a>
+	</div>
+
+	<div class="fixed inset-x-0 bottom-0 z-50 p-3 flex justify-center">
+		<a href="/#policy" class="embossed mb-1 text-[clamp(1rem,1vw,2rem)] text-yellow-600 font-['Cinzel',serif]">
+			Privacy Policy
+		</a>
+	</div>
+</body>
+
+</html>
