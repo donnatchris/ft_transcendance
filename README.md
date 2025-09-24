@@ -3,9 +3,6 @@
 # FT_TRANSCENDANCE PROJECT FOR 42
 By chdonnat (Christophe Donnat from 42 Perpignan, France)
 
-![gif transcendence](images/transcendence_gif_placeholder.gif)
-*(Note: Replace with a project demonstration GIF)*
-
 ## PROJECT GOAL:
 This project involves creating a complete web platform for a real-time multiplayer Pong game. The objective is to develop a modern web application including a backend, a frontend, a database, user authentication, and many other features, all containerized with Docker.
 
